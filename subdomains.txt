@@ -1,0 +1,8 @@
+admin
+dev
+test
+login
+panel
+api
+mail
+legal
