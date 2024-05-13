@@ -158,6 +158,7 @@ def generate_pdf_report(ip_address, service_versions, exploits, directories, sub
 
 
 def main():
+    should_update = input("Do you want to update the system?")
     ip_address = input("Enter IP address: ")
     run_nmap = input("Do you want to run Nmap? (yes/no): ").lower()
     run_searchsploit = input("Do you want to run Searchsploit? (yes/no): ").lower()
@@ -168,6 +169,9 @@ def main():
     exploits = []
     directories = []
     subdomains = []
+
+    if should_update == 'yes':
+        install_packages()
 
     if run_nmap == 'yes':
         versions = nmap_scan(ip_address)
