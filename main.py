@@ -10,7 +10,24 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
 
+
+def install_packages():
+    try:
+        print("Installing required packages...")
+        print("Updating")
+        subprocess.run(["sudo", "apt", "update"])
+        print("Installing Nmap ...")
+        subprocess.run(["sudo", "apt", "install", "nmap", "-y"])
+        print("Installing Searchsploit ...")
+        subprocess.run(["sudo", "apt", "install", "exploitdb", "-y"])
+        print("Packages installed successfully.")
+    except Exception as e:
+        print("Error installing packages:", e)
+        sys.exit(1)
+
+
 def nmap_scan(ip_address):
+    print("Starting network scan ...")
     scanner = nmap.PortScanner()
     scanner.scan(ip_address, arguments='-sV')
 
@@ -27,6 +44,7 @@ def nmap_scan(ip_address):
     return service_versions
 
 def search_exploitdb(service_versions):
+    print("Looking for known exploits ...")
     exploits = []
     for port, info in service_versions.items():
         query = f"{info['service']} {info['version']} exploit"
@@ -50,6 +68,7 @@ def search_exploitdb(service_versions):
     return exploits
 
 def directory_enumeration(ip_address):
+    print("Starting directory enumeration ...")
     directories = []
     wordlist_file = "directories.txt"
     with open(wordlist_file, 'r') as f:
@@ -66,6 +85,7 @@ def directory_enumeration(ip_address):
     return directories
 
 def subdomain_enumeration(domain):
+    print("Starting subdomain enumeration ...")
     subdomains = []
     wordlist_file = "subdomains.txt"  
     with open(wordlist_file, 'r') as f:
@@ -81,6 +101,7 @@ def subdomain_enumeration(domain):
     return subdomains
 
 def generate_pdf_report(ip_address, service_versions, exploits, directories, subdomains):
+    print("Generating the report ...")
     formatted_time = time.strftime("%d_%m_%y_%H:%M:%S", time.localtime())
     doc = SimpleDocTemplate(f"report_{ip_address}_{formatted_time}.pdf", pagesize=letter)
     report_content = []
@@ -103,7 +124,6 @@ def generate_pdf_report(ip_address, service_versions, exploits, directories, sub
     report_content.append(service_table)
     report_content.append(Spacer(1, 12))
 
-    # Add Exploits
     exploit_data = [['Exploit Title', 'Link']]
     for exploit in exploits:
         exploit_title = re.sub(r'\x1b\[[0-9;]*[mK]', '', exploit['title'])
@@ -121,7 +141,6 @@ def generate_pdf_report(ip_address, service_versions, exploits, directories, sub
     report_content.append(Paragraph("Exploits:", getSampleStyleSheet()['Heading2']))
     report_content.append(exploit_table)
 
-    # Add Directories Found
     if directories:
         report_content.append(Spacer(1, 12))
         report_content.append(Paragraph("Directories Found:", getSampleStyleSheet()['Heading2']))
